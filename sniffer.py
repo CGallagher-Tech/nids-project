@@ -1,6 +1,7 @@
 from scapy.all import sniff, IP, TCP, UDP, ICMP, conf
 import time
 from detector import detect_port_scan, detect_icmp_flood
+from logger import log_alert
 
 conf.use_pcap = True
 
@@ -33,28 +34,32 @@ def extract_packet_info(packet):
     return packet_info
 
 def process_packet(packet):
-    packet_info = extract_packet_info(packet)
+    try:
+        packet_info = extract_packet_info(packet)
 
-    if packet_info is None:
-        return
+        if packet_info is None:
+            return
 
-    print(packet_info)
+        print(packet_info)
 
-    # Check port scan
-    alert = detect_port_scan(packet_info)
-    if alert:
-        print("\nALERT!")
-        print(alert)
-        print()
+        alert = detect_port_scan(packet_info)
+        if alert:
+            print("\nALERT!")
+            print(alert)
+            log_alert(alert)
+            print()
 
-    # Check ICMP flood
-    alert = detect_icmp_flood(packet_info)
-    if alert:
-        print("\nALERT!")
-        print(alert)
-        print()
+        alert = detect_icmp_flood(packet_info)
+        if alert:
+            print("\nALERT!")
+            print(alert)
+            log_alert(alert)
+            print()
+
+    except Exception as e:
+        print(f"Packet processing error: {e}")
 
 def start_sniffing(interface=None):
     print("Starting packet capture...")
-    sniff(iface=interface, prn=process_packet, store=False, timeout=15)
+    sniff(iface=interface, prn=process_packet, store=False, timeout=30)
     print("Packet capture finished.")

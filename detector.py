@@ -1,11 +1,14 @@
 import time
+import ipaddress
 from collections import defaultdict
+
+LOCAL_SUBNET = ipaddress.ip_network("10.222.3.0/24")
 
 # Store activity by source IP
 scan_tracker = defaultdict(list)
 
 # Detection settings
-PORT_SCAN_THRESHOLD = 10   # number of different ports
+PORT_SCAN_THRESHOLD = 15   # number of different ports
 TIME_WINDOW = 5            # seconds
 
 # Track already alerted IPs
@@ -46,7 +49,7 @@ def detect_port_scan(packet_info):
 icmp_tracker = defaultdict(list)
 
 # ICMP detection settings
-ICMP_THRESHOLD = 2   # number of packets
+ICMP_THRESHOLD = 5   # number of packets
 ICMP_TIME_WINDOW = 10  # seconds
 
 def detect_icmp_flood(packet_info):
@@ -54,6 +57,10 @@ def detect_icmp_flood(packet_info):
         return None
 
     src_ip = packet_info["src_ip"]
+
+    if ipaddress.ip_address(src_ip) not in LOCAL_SUBNET:
+        return None
+
     current_time = packet_info["timestamp"]
 
     # Add timestamp
