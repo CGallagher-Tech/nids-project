@@ -1,12 +1,13 @@
 from scapy.all import sniff, IP, TCP, UDP, ICMP, conf
 import time
+from detector import detect_port_scan, detect_icmp_flood
 
 conf.use_pcap = True
 
 def extract_packet_info(packet):
     if IP not in packet:
         return None
-    
+
     packet_info = {
         "timestamp": time.time(),
         "src_ip": packet[IP].src,
@@ -39,7 +40,21 @@ def process_packet(packet):
 
     print(packet_info)
 
+    # Check port scan
+    alert = detect_port_scan(packet_info)
+    if alert:
+        print("\nALERT!")
+        print(alert)
+        print()
+
+    # Check ICMP flood
+    alert = detect_icmp_flood(packet_info)
+    if alert:
+        print("\nALERT!")
+        print(alert)
+        print()
+
 def start_sniffing(interface=None):
     print("Starting packet capture...")
-    sniff(iface=interface, prn=process_packet, store=False, count=20)
+    sniff(iface=interface, prn=process_packet, store=False, timeout=15)
     print("Packet capture finished.")
