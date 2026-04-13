@@ -2,7 +2,10 @@ import json
 import os
 from datetime import datetime
 
-ALERTS_FILE = "alerts.json"
+with open("config.json", "r") as f:
+    config = json.load(f)
+
+ALERTS_FILE = config["logging"]["alerts_file"]
 
 def log_alert(alert):
     log_entry = {

@@ -1,0 +1,15 @@
+{
+  "port_scan": {
+    "_comment": "15 ports in 10s for production, lower threshold for testing",
+    "threshold": 15,
+    "time_window": 10
+  },
+  "icmp_flood": {
+    "_comment": "20 packets in 10s for production, 5 for testing",
+    "threshold": 20, 
+    "time_window": 10
+  },
+  "logging": {
+    "alerts_file": "alerts.json"
+  }
+}
